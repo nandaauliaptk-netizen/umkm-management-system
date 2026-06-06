@@ -10,12 +10,34 @@ $totalPengeluaran = mysqli_fetch_assoc(
 );
 
 $laba = ($totalPendapatan['total'] ?? 0) - ($totalPengeluaran['total'] ?? 0);
+
+$persentase = 0;
+
+if(($totalPendapatan['total'] ?? 0) > 0){
+    $persentase =
+        ($laba / $totalPendapatan['total']) * 100;
+}
+
+$kesimpulan = "";
+
+if($laba > 0){
+    $kesimpulan = "🟢 Usaha Mengalami Keuntungan";
+}
+elseif($laba < 0){
+    $kesimpulan = "🔴 Usaha Mengalami Kerugian";
+}
+else{
+    $kesimpulan = "🟡 Usaha Berada Pada Kondisi Impas";
+}
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Finance UMKM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
     <style>
         body{
@@ -74,8 +96,67 @@ $laba = ($totalPendapatan['total'] ?? 0) - ($totalPengeluaran['total'] ?? 0);
 </div>
 
 <div class="card">
+
     <h3>Laba Bersih</h3>
-    Rp <?= number_format($laba,0,',','.') ?>
+
+    <h2>
+        Rp <?= number_format($laba,0,',','.') ?>
+    </h2>
+
+    <hr>
+
+    <strong>
+        Persentase Keuntungan:
+        <?= number_format($persentase,2) ?>%
+    </strong>
+
+    <br><br>
+
+    <?php
+    if($persentase >= 50){
+        echo "🚀 Sangat Baik";
+    }
+    elseif($persentase >= 20){
+        echo "👍 Baik";
+    }
+    elseif($persentase > 0){
+        echo "🙂 Cukup";
+    }
+    else{
+        echo "⚠️ Rugi";
+    }
+    ?>
+
+</div>
+
+<div class="card">
+
+    <h3>📈 Grafik Keuangan</h3>
+
+    <canvas id="grafikKeuangan"></canvas>
+
+    <br>
+
+    <h3><?= $kesimpulan ?></h3>
+
+    <?php if($laba > 0){ ?>
+        <p>
+            Pendapatan lebih besar daripada pengeluaran sehingga usaha memperoleh keuntungan.
+        </p>
+    <?php } ?>
+
+    <?php if($laba < 0){ ?>
+        <p>
+            Pengeluaran lebih besar daripada pendapatan sehingga usaha mengalami kerugian.
+        </p>
+    <?php } ?>
+
+    <?php if($laba == 0){ ?>
+        <p>
+            Pendapatan dan pengeluaran sama sehingga usaha berada pada kondisi impas.
+        </p>
+    <?php } ?>
+
 </div>
 
 <br>
@@ -110,10 +191,18 @@ while($d = mysqli_fetch_array($data)){
     <td><?= $d['keterangan']; ?></td>
     <td>Rp <?= number_format($d['jumlah'],0,',','.'); ?></td>
     <td>
-        <a href="hapus_pendapatan.php?id=<?= $d['id_pendapatan']; ?>">
-            Hapus
-        </a>
-    </td>
+
+    <a href="edit_pendapatan.php?id=<?= $d['id_pendapatan']; ?>">
+        Edit
+    </a>
+
+    |
+
+    <a href="hapus_pendapatan.php?id=<?= $d['id_pendapatan']; ?>">
+        Hapus
+    </a>
+
+</td>
 </tr>
 <?php } ?>
 
@@ -143,14 +232,94 @@ while($d = mysqli_fetch_array($data)){
     <td><?= $d['keterangan']; ?></td>
     <td>Rp <?= number_format($d['jumlah'],0,',','.'); ?></td>
     <td>
-        <a href="hapus_pengeluaran.php?id=<?= $d['id_pengeluaran']; ?>">
-            Hapus
-        </a>
-    </td>
+
+    <a href="edit_pengeluaran.php?id=<?= $d['id_pengeluaran']; ?>">
+        Edit
+    </a>
+
+    |
+
+    <a href="hapus_pengeluaran.php?id=<?= $d['id_pengeluaran']; ?>">
+        Hapus
+    </a>
+
+</td>
 </tr>
 <?php } ?>
 
 </table>
+
+<script>
+
+const ctx = document.getElementById('grafikKeuangan');
+
+new Chart(ctx, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: [
+            'Pendapatan',
+            'Pengeluaran',
+            'Laba Bersih'
+        ],
+
+        datasets: [
+
+{
+    label: 'Pendapatan',
+
+    data: [
+        <?= ($totalPendapatan['total'] ?? 0) ?>,
+        null,
+        null
+    ],
+
+    borderColor: 'green',
+    backgroundColor: 'green',
+    borderWidth: 4
+},
+
+{
+    label: 'Pengeluaran',
+
+    data: [
+        null,
+        <?= ($totalPengeluaran['total'] ?? 0) ?>,
+        null
+    ],
+
+    borderColor: 'red',
+    backgroundColor: 'red',
+    borderWidth: 4
+},
+
+{
+    label: 'Laba Bersih',
+
+    data: [
+        null,
+        null,
+        <?= $laba ?>
+    ],
+
+    borderColor: 'blue',
+    backgroundColor: 'blue',
+    borderWidth: 4
+}
+
+]
+
+    },
+
+    options: {
+        responsive: true
+    }
+
+});
+
+</script>
 
 </body>
 </html>
