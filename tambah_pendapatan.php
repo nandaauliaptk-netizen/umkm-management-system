@@ -1,39 +1,30 @@
-<?php
-include 'koneksi.php';
+<!-- Header Dashboard (Pastikan sudah include header.php atau struktur app-wrapper) -->
+<div class="page-header">
+    <h2>Tambah Pendapatan</h2>
+    <p>Masukkan detail transaksi pendapatan baru.</p>
+</div>
 
-if(isset($_POST['simpan'])){
+<div class="card" style="max-width: 600px;">
+    <form action="proses_pendapatan.php" method="POST">
+        <div class="form-group">
+            <label class="form-label">Jumlah (Rp)</label>
+            <div class="input-wrap">
+                <input class="form-control no-icon" type="number" name="jumlah" placeholder="Contoh: 50000" required>
+            </div>
+        </div>
 
-    $tanggal = $_POST['tanggal'];
-    $keterangan = $_POST['keterangan'];
-    $jumlah = $_POST['jumlah'];
+        <div class="form-group">
+            <label class="form-label">Keterangan</label>
+            <div class="input-wrap">
+                <input class="form-control no-icon" type="text" name="keterangan" placeholder="Sumber pendapatan..." required>
+            </div>
+        </div>
 
-    mysqli_query($koneksi,"
-        INSERT INTO pendapatan
-        (id_umkm,tanggal,keterangan,jumlah)
-        VALUES
-        (1,'$tanggal','$keterangan','$jumlah')
-    ");
-
-    header("Location:index.php");
-}
-?>
-
-<h2>Tambah Pendapatan</h2>
-
-<form method="POST">
-
-    Tanggal <br>
-    <input type="date" name="tanggal" required>
-    <br><br>
-
-    Keterangan <br>
-    <input type="text" name="keterangan" required>
-    <br><br>
-
-    Jumlah <br>
-    <input type="number" name="jumlah" required>
-    <br><br>
-
-    <button name="simpan">Simpan</button>
-
-</form>
+        <div class="modal-footer" style="margin-top: 10px; border-top: none; padding-top: 10px;">
+            <a href="index.php" class="btn btn-secondary">Batal</a>
+            <button type="submit" name="submit" class="btn btn-primary">
+                Simpan Pendapatan
+            </button>
+        </div>
+    </form>
+</div>
