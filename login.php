@@ -13,54 +13,35 @@ $success = '';
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $email    = trim(strtolower($_POST['username'] ?? ''));
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
-        $error = 'Username dan password tidak boleh kosong.';
+    if (empty($email) || empty($password)) {
+        $error = 'Email dan password tidak boleh kosong.';
     } else {
-        // Deteksi nama kolom username otomatis dari tabel users
-        $col_username = 'username'; // default
-        $col_result = $koneksi->query("SHOW COLUMNS FROM users");
-        if ($col_result) {
-            $columns = [];
-            while ($col = $col_result->fetch_assoc()) {
-                $columns[] = strtolower($col['Field']);
-            }
-            foreach (['username','user','nama_user','email','name','nama'] as $candidate) {
-                if (in_array($candidate, $columns)) {
-                    $col_username = $candidate;
-                    break;
-                }
-            }
-        }
-
-        $stmt = $koneksi->prepare("SELECT * FROM users WHERE `{$col_username}` = ? LIMIT 1");
+        $stmt = $koneksi->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
         if (!$stmt) {
             $error = 'Kesalahan database: ' . $koneksi->error;
         } else {
-            $stmt->bind_param("s", $username);
+            $stmt->bind_param("s", $email);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result && $result->num_rows === 1) {
                 $user = $result->fetch_assoc();
-                $stored_pass = $user['password'] ?? $user['pass'] ?? $user['passwd'] ?? '';
+                $stored_pass = $user['password'] ?? '';
 
-                // Support password_hash() dan plain text
-                $valid = password_verify($password, $stored_pass) || ($password === $stored_pass);
-
-                if ($valid) {
-                    $_SESSION['user']    = $user[$col_username];
-                    $_SESSION['user_id'] = $user['id'] ?? 0;
-                    $_SESSION['nama']    = $user['nama'] ?? $user['name'] ?? $user[$col_username];
+                if (password_verify($password, $stored_pass) || ($password === $stored_pass)) {
+                    $_SESSION['user']    = $user['email'];
+                    $_SESSION['user_id'] = $user['id_user'];
+                    $_SESSION['nama']    = $user['nama'];
                     header("Location: index.php");
                     exit();
                 } else {
                     $error = 'Password yang Anda masukkan salah.';
                 }
             } else {
-                $error = 'Username tidak ditemukan.';
+                $error = 'Email tidak ditemukan.';
             }
             $stmt->close();
         }
@@ -130,11 +111,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .logo-mark {
             width: 44px; height: 44px;
-            background: var(--accent);
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.15);
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            position: relative;
-            box-shadow: 0 0 20px rgba(37,99,235,0.5);
+            box-shadow: 0 4px 16px rgba(99,51,220,0.35);
         }
         .logo-mark svg { width: 26px; height: 26px; }
         .logo-text { line-height: 1; }
@@ -451,7 +432,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Form -->
     <div class="form-area">
         <h1>Selamat Datang 👋</h1>
-        <p class="sub">Masuk ke akun Anda untuk mengelola bisnis UMKM Anda</p>
+        <p class="sub">Masuk menggunakan email &amp; password Anda</p>
 
         <?php if ($error): ?>
         <div class="alert error">
@@ -468,11 +449,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" id="loginForm">
             <div class="field">
-                <label>Username</label>
+                <label>Email</label>
                 <div class="input-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <input type="text" name="username" placeholder="Masukkan username Anda"
-                           value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autocomplete="username">
+                    <input type="email" name="username" placeholder="Masukkan email Anda"
+                           value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autocomplete="email">
                 </div>
             </div>
 
@@ -532,30 +513,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="hero-divider"></div>
         <p class="hero-tagline">Platform manajemen bisnis modern<br>untuk UMKM Indonesia yang lebih<br>maju, rapi, dan terorganisir.</p>
 
-        <!-- Feature list -->
-        <div class="hero-features">
-            <div class="hf-item">
-                <div class="hf-icon" style="background:rgba(59,130,246,0.15)">💰</div>
-                <div class="hf-text">
-                    <strong>Kelola Pendapatan & Pengeluaran</strong>
-                    <span>Catat arus kas bisnis secara mudah</span>
-                </div>
-            </div>
-            <div class="hf-item">
-                <div class="hf-icon" style="background:rgba(6,182,212,0.15)">📊</div>
-                <div class="hf-text">
-                    <strong>Laporan Grafik Real-time</strong>
-                    <span>Pantau performa bisnis lewat grafik</span>
-                </div>
-            </div>
-            <div class="hf-item">
-                <div class="hf-icon" style="background:rgba(16,185,129,0.15)">✏️</div>
-                <div class="hf-text">
-                    <strong>Edit & Hapus Data Fleksibel</strong>
-                    <span>Kelola data kapan saja dengan mudah</span>
-                </div>
-            </div>
-        </div>
+
 
         <div class="hero-badge">
             <div class="badge-dot"></div>
