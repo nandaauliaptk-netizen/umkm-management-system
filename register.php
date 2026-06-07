@@ -2,7 +2,6 @@
 session_start();
 require_once 'koneksi.php';
 
-// Redirect if already logged in
 if (isset($_SESSION['user'])) {
     header("Location: index.php");
     exit();
@@ -13,12 +12,11 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama     = trim($_POST['nama']     ?? '');
-    $email    = trim($_POST['email']    ?? '');
-    $username = trim($_POST['username'] ?? '');
+    $email    = trim(strtolower($_POST['email'] ?? ''));
     $password =      $_POST['password'] ?? '';
     $confirm  =      $_POST['confirm']  ?? '';
 
-    if (empty($nama) || empty($email) || empty($username) || empty($password)) {
+    if (empty($nama) || empty($email) || empty($password)) {
         $error = 'Semua kolom wajib diisi.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid.';
@@ -27,30 +25,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm) {
         $error = 'Konfirmasi password tidak cocok.';
     } else {
-        // Cek apakah username sudah ada
-        $cek = $koneksi->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
-        $cek->bind_param("s", $username);
-        $cek->execute();
-        $cek->store_result();
-
-        if ($cek->num_rows > 0) {
-            $error = 'Username sudah digunakan, pilih yang lain.';
+        // Cek apakah email sudah terdaftar
+        $cek = $koneksi->prepare("SELECT id_user FROM users WHERE email = ? LIMIT 1");
+        if (!$cek) {
+            $error = 'Kesalahan database: ' . $koneksi->error;
         } else {
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $koneksi->prepare("INSERT INTO users (nama, email, username, password) VALUES (?, ?, ?, ?)");
-            if (!$stmt) {
-                $error = 'Kesalahan database: ' . $koneksi->error;
+            $cek->bind_param("s", $email);
+            $cek->execute();
+            $cek->store_result();
+
+            if ($cek->num_rows > 0) {
+                $error = 'Email sudah terdaftar, gunakan email lain atau login.';
             } else {
-                $stmt->bind_param("ssss", $nama, $email, $username, $hash);
-                if ($stmt->execute()) {
-                    $success = 'Akun berhasil dibuat! Silakan login.';
+                $hash   = password_hash($password, PASSWORD_DEFAULT);
+                $status = 'aktif';
+                $stmt   = $koneksi->prepare("INSERT INTO users (nama, email, password, status_verifikasi) VALUES (?, ?, ?, ?)");
+                if (!$stmt) {
+                    $error = 'Kesalahan database: ' . $koneksi->error;
                 } else {
-                    $error = 'Gagal mendaftarkan akun: ' . $stmt->error;
+                    $stmt->bind_param("ssss", $nama, $email, $hash, $status);
+                    if ($stmt->execute()) {
+                        $success = 'Akun berhasil dibuat! Silakan login.';
+                    } else {
+                        $error = 'Gagal mendaftarkan akun: ' . $stmt->error;
+                    }
+                    $stmt->close();
                 }
-                $stmt->close();
             }
+            $cek->close();
         }
-        $cek->close();
     }
 }
 ?>
@@ -113,10 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .logo { display: flex; align-items: center; gap: 12px; }
         .logo-mark {
             width: 44px; height: 44px;
-            background: var(--accent);
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.15);
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(37,99,235,0.5);
+            box-shadow: 0 4px 16px rgba(99,51,220,0.35);
             flex-shrink: 0;
         }
         .logo-mark svg { width: 28px; height: 28px; }
@@ -421,27 +425,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" id="registerForm">
-            <!-- Row 1: Nama + Username -->
-            <div class="field-row">
-                <div class="field">
-                    <label>Nama Lengkap</label>
-                    <div class="input-wrap">
-                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <input type="text" name="nama" placeholder="Nama Anda" value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Username</label>
-                    <div class="input-wrap">
-                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        <input type="text" name="username" placeholder="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autocomplete="username">
-                    </div>
+            <!-- Nama Lengkap -->
+            <div class="field">
+                <label>Nama Lengkap</label>
+                <div class="input-wrap">
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <input type="text" name="nama" placeholder="Nama lengkap Anda" value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required autocomplete="name">
                 </div>
             </div>
 
-            <!-- Email -->
+            <!-- Email (digunakan sebagai login) -->
             <div class="field">
-                <label>Email</label>
+                <label>Email <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(digunakan untuk login)</span></label>
                 <div class="input-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     <input type="email" name="email" placeholder="email@contoh.com" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required autocomplete="email">
