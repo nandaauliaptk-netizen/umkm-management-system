@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'koneksi.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user'])) {
@@ -12,34 +13,57 @@ $success = '';
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_once 'koneksi.php';
-
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
         $error = 'Username dan password tidak boleh kosong.';
     } else {
-        $stmt = $koneksi->prepare("SELECT * FROM users WHERE username = ? LIMIT 1");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result && $result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            if (password_verify($password, $user['password'])) {
-                $_SESSION['user'] = $user['username'];
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['nama'] = $user['nama'] ?? $user['username'];
-                header("Location: index.php");
-                exit();
-            } else {
-                $error = 'Password yang Anda masukkan salah.';
+        // Deteksi nama kolom username otomatis dari tabel users
+        $col_username = 'username'; // default
+        $col_result = $koneksi->query("SHOW COLUMNS FROM users");
+        if ($col_result) {
+            $columns = [];
+            while ($col = $col_result->fetch_assoc()) {
+                $columns[] = strtolower($col['Field']);
             }
-        } else {
-            $error = 'Username tidak ditemukan.';
+            foreach (['username','user','nama_user','email','name','nama'] as $candidate) {
+                if (in_array($candidate, $columns)) {
+                    $col_username = $candidate;
+                    break;
+                }
+            }
         }
-        $stmt->close();
+
+        $stmt = $koneksi->prepare("SELECT * FROM users WHERE `{$col_username}` = ? LIMIT 1");
+        if (!$stmt) {
+            $error = 'Kesalahan database: ' . $koneksi->error;
+        } else {
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result && $result->num_rows === 1) {
+                $user = $result->fetch_assoc();
+                $stored_pass = $user['password'] ?? $user['pass'] ?? $user['passwd'] ?? '';
+
+                // Support password_hash() dan plain text
+                $valid = password_verify($password, $stored_pass) || ($password === $stored_pass);
+
+                if ($valid) {
+                    $_SESSION['user']    = $user[$col_username];
+                    $_SESSION['user_id'] = $user['id'] ?? 0;
+                    $_SESSION['nama']    = $user['nama'] ?? $user['name'] ?? $user[$col_username];
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    $error = 'Password yang Anda masukkan salah.';
+                }
+            } else {
+                $error = 'Username tidak ditemukan.';
+            }
+            $stmt->close();
+        }
     }
 }
 ?>
@@ -486,7 +510,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="custom-cb"></div>
                     <span>Ingat saya</span>
                 </label>
-                <a href="lupa_password.php" class="link">Lupa password?</a>
+                <a href="#" class="link" onclick="alert('Hubungi admin untuk reset password.');return false;">Lupa password?</a>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">Masuk ke Dashboard</button>
