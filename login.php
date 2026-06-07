@@ -282,161 +282,142 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         /* ══════════════════════════════════════
-           RIGHT PANEL — Visual / Branding
+           RIGHT PANEL — Branding Only
         ══════════════════════════════════════ */
         .right {
             flex: 1; position: relative; overflow: hidden;
-            background: var(--navy2);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            background: #0a0f1e;
         }
 
-        /* Animated blobs */
-        .blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(80px); opacity: 0.18;
-            animation: drift 12s ease-in-out infinite alternate;
-        }
-        .blob-1 { width: 500px; height: 500px; background: #1e40af; top: -100px; right: -80px; animation-delay: 0s; }
-        .blob-2 { width: 400px; height: 400px; background: #0e7490; bottom: -80px; left: 40px; animation-delay: -4s; }
-        .blob-3 { width: 300px; height: 300px; background: #7c3aed; top: 40%; right: 20%; animation-delay: -8s; }
-        @keyframes drift {
-            0%   { transform: translate(0,0) scale(1); }
-            100% { transform: translate(30px, -30px) scale(1.1); }
-        }
-
-        /* Grid lines */
-        .grid-lines {
+        /* Swirl mesh gradient background */
+        .swirl {
             position: absolute; inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-            background-size: 60px 60px;
+            background:
+                radial-gradient(ellipse 80% 70% at 70% 40%, rgba(99,51,220,0.55) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 80% at 30% 70%, rgba(20,100,230,0.45) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(6,182,212,0.3) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 20% 20%, rgba(139,92,246,0.25) 0%, transparent 50%);
+            animation: swirl-shift 10s ease-in-out infinite alternate;
+        }
+        @keyframes swirl-shift {
+            0%   { filter: blur(40px) saturate(1.2); transform: scale(1) rotate(0deg); }
+            50%  { filter: blur(50px) saturate(1.4); transform: scale(1.05) rotate(2deg); }
+            100% { filter: blur(40px) saturate(1.2); transform: scale(1) rotate(-1deg); }
+        }
+
+        /* Dark overlay for readability */
+        .right::after {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(8,12,28,0.45);
+            pointer-events: none; z-index: 1;
+        }
+
+        /* Subtle dot grid */
+        .dot-grid {
+            position: absolute; inset: 0; z-index: 2;
+            background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 36px 36px;
         }
 
         /* Content */
         .right-content {
-            position: relative; z-index: 2;
-            text-align: center; padding: 40px;
-            max-width: 560px;
+            position: relative; z-index: 3;
+            text-align: center; padding: 48px 40px;
+            max-width: 500px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Big logo mark */
-        .hero-logo {
-            margin: 0 auto 32px;
-            position: relative; display: inline-block;
-        }
+        /* Logo mark */
         .hero-logo-bg {
-            width: 100px; height: 100px;
-            background: linear-gradient(135deg, var(--accent) 0%, #0e7490 100%);
-            border-radius: 24px;
+            width: 90px; height: 90px;
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            border-radius: 22px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 60px rgba(37,99,235,0.4), 0 0 120px rgba(6,182,212,0.2);
-            animation: pulse-glow 3s ease-in-out infinite;
+            margin-bottom: 32px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 40px rgba(99,51,220,0.4), 0 0 80px rgba(6,182,212,0.15);
+            animation: logo-pulse 4s ease-in-out infinite;
         }
-        @keyframes pulse-glow {
-            0%,100% { box-shadow: 0 0 40px rgba(37,99,235,.4), 0 0 80px rgba(6,182,212,.15); }
-            50%      { box-shadow: 0 0 70px rgba(37,99,235,.6), 0 0 140px rgba(6,182,212,.3); }
+        @keyframes logo-pulse {
+            0%,100% { box-shadow: 0 8px 40px rgba(99,51,220,.4), 0 0 80px rgba(6,182,212,.15); }
+            50%      { box-shadow: 0 8px 60px rgba(99,51,220,.65), 0 0 120px rgba(6,182,212,.3); }
         }
-        .hero-logo-bg svg { width: 56px; height: 56px; }
+        .hero-logo-bg svg { width: 52px; height: 52px; }
 
+        /* Hero title */
         .hero-title {
             font-family: 'Syne', sans-serif;
-            font-size: 42px; font-weight: 800;
-            letter-spacing: -2px; line-height: 1;
-            margin-bottom: 10px;
+            font-size: 52px; font-weight: 800;
+            letter-spacing: -3px; line-height: 1;
+            color: #fff;
+            margin-bottom: 16px;
         }
-        .hero-title span { color: var(--accent2); }
-        .hero-sub {
-            font-size: 15px; color: var(--muted); margin-bottom: 48px; line-height: 1.6;
+        .hero-title span {
+            background: linear-gradient(135deg, #60a5fa 0%, #06b6d4 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* Stats cards */
-        .stats-row {
-            display: flex; gap: 16px; justify-content: center; margin-bottom: 36px;
-            flex-wrap: wrap;
+        /* Tagline */
+        .hero-tagline {
+            font-size: 15px; color: rgba(255,255,255,0.45);
+            line-height: 1.7; margin-bottom: 48px;
+            font-weight: 300; letter-spacing: 0.2px;
         }
-        .stat-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 24px;
+
+        /* Divider line */
+        .hero-divider {
+            width: 60px; height: 2px;
+            background: linear-gradient(90deg, var(--accent2), var(--teal));
+            border-radius: 2px; margin-bottom: 36px;
+        }
+
+        /* Feature list */
+        .hero-features {
+            display: flex; flex-direction: column; gap: 14px;
+            width: 100%; max-width: 320px;
             text-align: left;
-            backdrop-filter: blur(10px);
-            min-width: 130px;
-            transition: transform .3s, border-color .3s;
         }
-        .stat-card:hover { transform: translateY(-4px); border-color: rgba(59,130,246,.3); }
-        .stat-icon { font-size: 22px; margin-bottom: 8px; }
-        .stat-val {
-            font-family: 'Syne', sans-serif;
-            font-size: 26px; font-weight: 800;
-            line-height: 1; margin-bottom: 4px;
+        .hf-item {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 14px 18px;
+            backdrop-filter: blur(8px);
+            transition: background .3s, border-color .3s;
         }
-        .stat-val.blue  { color: var(--accent2); }
-        .stat-val.teal  { color: var(--teal); }
-        .stat-val.gold  { color: var(--gold); }
-        .stat-val.green { color: var(--success); }
-        .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .hf-item:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(99,102,241,0.3);
+        }
+        .hf-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; flex-shrink: 0;
+        }
+        .hf-text { line-height: 1.3; }
+        .hf-text strong { font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 600; display: block; }
+        .hf-text span   { font-size: 11px; color: rgba(255,255,255,0.35); }
 
-        /* Mini chart */
-        .chart-box {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 14px;
-            padding: 20px 24px 12px;
-            backdrop-filter: blur(10px);
+        /* Bottom badge */
+        .hero-badge {
+            margin-top: 40px;
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px; padding: 8px 20px;
+            font-size: 12px; color: rgba(255,255,255,0.4);
         }
-        .chart-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px;
+        .badge-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: blink 2s ease-in-out infinite;
         }
-        .chart-header span:first-child { font-size: 13px; font-weight: 500; color: var(--text); }
-        .badge-up {
-            background: rgba(16,185,129,.15);
-            color: var(--success);
-            font-size: 11px; padding: 3px 10px;
-            border-radius: 20px; border: 1px solid rgba(16,185,129,.25);
-        }
-        .chart-legend {
-            display: flex; gap: 16px; margin-bottom: 12px;
-        }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-        .legend-dot  { width: 8px; height: 8px; border-radius: 2px; }
-        .bars {
-            display: flex; align-items: flex-end; gap: 4px;
-            height: 80px;
-            padding-bottom: 0;
-        }
-        .bar-group { flex: 1; display: flex; gap: 2px; align-items: flex-end; }
-        .bar {
-            flex: 1; border-radius: 3px 3px 0 0;
-            background: linear-gradient(180deg, var(--accent2) 0%, #1e40af 100%);
-            animation: grow .7s cubic-bezier(.34,1.3,.64,1) both;
-            transform-origin: bottom;
-            min-height: 6px;
-        }
-        .bar.teal { background: linear-gradient(180deg, var(--teal) 0%, #0e7490 100%); }
-        @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-        .bars-labels {
-            display: flex; gap: 4px; margin-top: 6px;
-        }
-        .bar-lbl { flex: 1; font-size: 9px; color: var(--muted); text-align: center; }
-
-        /* Feature pills */
-        .features {
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 28px;
-        }
-        .feat-pill {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 12px; color: var(--muted);
-            display: flex; align-items: center; gap: 6px;
-        }
-        .feat-pill .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
 
         /* Responsive */
         @media (max-width: 860px) {
@@ -527,83 +508,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- ════ RIGHT — BRANDING / VISUAL ════ -->
+<!-- ════ RIGHT — BRANDING ════ -->
 <div class="right">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="grid-lines"></div>
+    <div class="swirl"></div>
+    <div class="dot-grid"></div>
 
     <div class="right-content">
-        <!-- Hero Logo -->
-        <div class="hero-logo">
-            <div class="hero-logo-bg">
-                <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Big U -->
-                    <path d="M8 10 L8 34 Q8 46 20 46 L36 46 Q48 46 48 34 L48 10" stroke="white" stroke-width="5.5" stroke-linecap="round" fill="none"/>
-                    <!-- Arrow -->
-                    <path d="M30 22 L44 8 M37 8 L44 8 L44 15" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
+        <!-- Logo -->
+        <div class="hero-logo-bg">
+            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 10 L8 34 Q8 46 20 46 L36 46 Q48 46 48 34 L48 10" stroke="white" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+                <path d="M30 22 L44 8 M37 8 L44 8 L44 15" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
 
         <h2 class="hero-title">UMKM <span>Next</span></h2>
-        <p class="hero-sub">Platform manajemen bisnis modern untuk<br>UMKM Indonesia yang lebih maju & terorganisir.</p>
+        <div class="hero-divider"></div>
+        <p class="hero-tagline">Platform manajemen bisnis modern<br>untuk UMKM Indonesia yang lebih<br>maju, rapi, dan terorganisir.</p>
 
-        <!-- Stats -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-val blue">Rp&nbsp;0</div>
-                <div class="stat-lbl">Total Pendapatan</div>
+        <!-- Feature list -->
+        <div class="hero-features">
+            <div class="hf-item">
+                <div class="hf-icon" style="background:rgba(59,130,246,0.15)">💰</div>
+                <div class="hf-text">
+                    <strong>Kelola Pendapatan & Pengeluaran</strong>
+                    <span>Catat arus kas bisnis secara mudah</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">📉</div>
-                <div class="stat-val teal">Rp&nbsp;0</div>
-                <div class="stat-lbl">Total Pengeluaran</div>
+            <div class="hf-item">
+                <div class="hf-icon" style="background:rgba(6,182,212,0.15)">📊</div>
+                <div class="hf-text">
+                    <strong>Laporan Grafik Real-time</strong>
+                    <span>Pantau performa bisnis lewat grafik</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-val gold">Laba</div>
-                <div class="stat-lbl">Laporan Grafik</div>
+            <div class="hf-item">
+                <div class="hf-icon" style="background:rgba(16,185,129,0.15)">✏️</div>
+                <div class="hf-text">
+                    <strong>Edit & Hapus Data Fleksibel</strong>
+                    <span>Kelola data kapan saja dengan mudah</span>
+                </div>
             </div>
         </div>
 
-        <!-- Mini bar chart -->
-        <div class="chart-box">
-            <div class="chart-header">
-                <span>Visualisasi Arus Kas</span>
-                <span class="badge-up">↑ Grafik Real-time</span>
-            </div>
-            <div class="chart-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Pendapatan</div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Pengeluaran</div>
-            </div>
-            <div class="bars">
-                <div class="bar-group"><div class="bar" style="height:42px;animation-delay:.05s"></div><div class="bar teal" style="height:28px;animation-delay:.08s"></div></div>
-                <div class="bar-group"><div class="bar" style="height:56px;animation-delay:.1s"></div><div class="bar teal" style="height:36px;animation-delay:.13s"></div></div>
-                <div class="bar-group"><div class="bar" style="height:48px;animation-delay:.15s"></div><div class="bar teal" style="height:44px;animation-delay:.18s"></div></div>
-                <div class="bar-group"><div class="bar" style="height:68px;animation-delay:.2s"></div><div class="bar teal" style="height:38px;animation-delay:.23s"></div></div>
-                <div class="bar-group"><div class="bar" style="height:52px;animation-delay:.25s"></div><div class="bar teal" style="height:30px;animation-delay:.28s"></div></div>
-                <div class="bar-group"><div class="bar" style="height:80px;animation-delay:.3s"></div><div class="bar teal" style="height:50px;animation-delay:.33s"></div></div>
-            </div>
-            <div class="bars-labels">
-                <span class="bar-lbl">Jan</span>
-                <span class="bar-lbl">Feb</span>
-                <span class="bar-lbl">Mar</span>
-                <span class="bar-lbl">Apr</span>
-                <span class="bar-lbl">Mei</span>
-                <span class="bar-lbl">Jun</span>
-            </div>
-        </div>
-
-        <!-- Feature pills -->
-        <div class="features">
-            <div class="feat-pill"><div class="dot" style="background:var(--accent2)"></div>Kelola Pendapatan</div>
-            <div class="feat-pill"><div class="dot" style="background:var(--teal)"></div>Kelola Pengeluaran</div>
-            <div class="feat-pill"><div class="dot" style="background:var(--gold)"></div>Laporan Grafik</div>
-            <div class="feat-pill"><div class="dot" style="background:var(--success)"></div>Edit & Hapus Data</div>
-            <div class="feat-pill"><div class="dot" style="background:#a78bfa"></div>Multi User</div>
+        <div class="hero-badge">
+            <div class="badge-dot"></div>
+            Sistem aktif & siap digunakan
         </div>
     </div>
 </div>
@@ -628,10 +578,6 @@ document.getElementById('loginForm').addEventListener('submit', function() {
     btn.textContent = 'Memproses...';
 });
 
-// Animate bars with staggered delay
-document.querySelectorAll('.bar').forEach((b, i) => {
-    b.style.animationDelay = (i * 0.06) + 's';
-});
 </script>
 </body>
 </html>
