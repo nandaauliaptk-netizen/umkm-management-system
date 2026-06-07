@@ -202,7 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex; align-items: flex-start; gap: 10px;
             margin: 4px 0 20px;
         }
-        .terms-row input[type="checkbox"] { display: none; }
+        .terms-row input[type="checkbox"] {
+            position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+        }
         .custom-cb {
             width: 16px; height: 16px; min-width: 16px;
             border: 1.5px solid var(--border);
@@ -479,11 +481,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Terms -->
             <div class="terms-row">
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-                    <input type="checkbox" id="agreeChk" required>
-                    <div class="custom-cb" id="cbVisual"></div>
-                    <span>Saya menyetujui <a href="#" class="link">syarat & ketentuan</a> penggunaan UMKM Next</span>
-                </label>
+                <input type="checkbox" id="agreeChk" name="agree">
+                <div class="custom-cb" id="cbVisual" onclick="toggleAgree()"></div>
+                <span onclick="toggleAgree()" style="cursor:pointer;">Saya menyetujui <a href="#" class="link" onclick="event.stopPropagation()">syarat &amp; ketentuan</a> penggunaan UMKM Next</span>
             </div>
 
             <button type="submit" class="btn-register" id="regBtn">Buat Akun Sekarang</button>
@@ -589,15 +589,59 @@ function checkStrength(val) {
     label.style.color = cls === 'weak' ? 'var(--danger)' : cls === 'medium' ? 'var(--gold)' : 'var(--success)';
 }
 
-// Custom checkbox sync
-document.getElementById('agreeChk').addEventListener('change', function() {
-    document.getElementById('cbVisual').style.background = this.checked ? 'var(--accent)' : '';
-    document.getElementById('cbVisual').style.borderColor = this.checked ? 'var(--accent)' : '';
-    document.getElementById('cbVisual').innerHTML = this.checked ? '<span style="font-size:10px;color:#fff">✓</span>' : '';
-});
 
-// Loading state
-document.getElementById('registerForm').addEventListener('submit', function() {
+
+// Toggle checkbox
+function toggleAgree() {
+    const chk = document.getElementById('agreeChk');
+    const vis = document.getElementById('cbVisual');
+    chk.checked = !chk.checked;
+    if (chk.checked) {
+        vis.style.background = 'var(--accent)';
+        vis.style.borderColor = 'var(--accent)';
+        vis.innerHTML = '<span style="font-size:10px;color:#fff;line-height:1">✓</span>';
+    } else {
+        vis.style.background = '';
+        vis.style.borderColor = '';
+        vis.innerHTML = '';
+    }
+}
+
+// Form submit dengan validasi manual
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const chk = document.getElementById('agreeChk');
+    if (!chk.checked) {
+        e.preventDefault();
+        // Tampilkan pesan error
+        let errEl = document.getElementById('frontendError');
+        if (!errEl) {
+            errEl = document.createElement('div');
+            errEl.id = 'frontendError';
+            errEl.className = 'alert error';
+            errEl.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4m0 4h.01" stroke-width="2" stroke-linecap="round"/></svg> Harap centang persetujuan syarat &amp; ketentuan terlebih dahulu.';
+            this.insertBefore(errEl, this.querySelector('.terms-row'));
+        }
+        errEl.scrollIntoView({behavior:'smooth', block:'center'});
+        return;
+    }
+
+    // Validasi konfirmasi password
+    const pw  = document.getElementById('pwInput').value;
+    const cf  = document.getElementById('cfInput').value;
+    if (pw !== cf) {
+        e.preventDefault();
+        let errEl = document.getElementById('frontendError');
+        if (!errEl) {
+            errEl = document.createElement('div');
+            errEl.id = 'frontendError';
+            errEl.className = 'alert error';
+            this.insertBefore(errEl, this.querySelector('.terms-row'));
+        }
+        errEl.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4m0 4h.01" stroke-width="2" stroke-linecap="round"/></svg> Konfirmasi password tidak cocok.';
+        errEl.scrollIntoView({behavior:'smooth', block:'center'});
+        return;
+    }
+
     const btn = document.getElementById('regBtn');
     btn.classList.add('loading');
     btn.textContent = 'Memproses...';
