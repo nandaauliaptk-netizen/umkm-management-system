@@ -433,11 +433,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Logo -->
     <div class="logo">
         <div class="logo-mark">
-            <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- U shape -->
-                <path d="M3 4 L3 16 Q3 22 9 22 L17 22 Q23 22 23 16 L23 4" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
-                <!-- Arrow up-right -->
-                <path d="M14 10 L20 4 M17 4 L20 4 L20 7" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- U -->
+                <path d="M2 4 L2 16 Q2 22 8 22 L12 22 Q14 22 14 19" stroke="white" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                <!-- N -->
+                <path d="M16 22 L16 8 L24 22 L24 8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <!-- Arrow -->
+                <path d="M20 6 L26 2 M23.5 2 L26 2 L26 4.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
         <div class="logo-text">
@@ -516,9 +518,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="right-content">
         <!-- Logo -->
         <div class="hero-logo-bg">
-            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 10 L8 34 Q8 46 20 46 L36 46 Q48 46 48 34 L48 10" stroke="white" stroke-width="5.5" stroke-linecap="round" fill="none"/>
-                <path d="M30 22 L44 8 M37 8 L44 8 L44 15" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- U -->
+                <path d="M4 8 L4 30 Q4 42 14 42 L22 42 Q26 42 26 36" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+                <!-- N -->
+                <path d="M30 42 L30 14 L46 42 L46 14" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <!-- Arrow -->
+                <path d="M39 10 L48 4 M44 4 L48 4 L48 8" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
 
