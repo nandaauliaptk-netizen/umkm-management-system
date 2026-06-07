@@ -1,4 +1,11 @@
 <?php
+session_start();
+// Jika tidak ada session login, kembalikan user ke halaman login
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    exit;
+}
+
 include 'koneksi.php';
 
 $totalPendapatan = mysqli_fetch_assoc(
