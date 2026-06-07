@@ -11,12 +11,11 @@ if (isset($_SESSION['login'])) {
 $error = '';
 
 if (isset($_POST['login'])) {
-    $email = mysqli_real_escape_string($akses, $_POST['email']);
+    $email = mysqli_real_escape_string($koneksi, $_POST['email']);
     $password = $_POST['password'];
 
     // Cari user berdasarkan email
-    $result = mysqli_query($akses, "SELECT * FROM user WHERE email = '$email'");
-    
+   $result = mysqli_query($koneksi, "SELECT * FROM user WHERE email = '$email'");
     if (mysqli_num_rows($result) === 1) {
         $row = mysqli_fetch_assoc($result);
         
