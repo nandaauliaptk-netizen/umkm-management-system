@@ -1,14 +1,25 @@
 <?php
-$host     = "localhost";
-$username = "root";
-$password = "";
-$database = "db_umkm"; 
+// ================================================================
+// koneksi.php
+// ================================================================
+$host    = 'localhost';
+$db      = 'db_umkm';
+$user    = 'root';
+$pass    = '';
+$charset = 'utf8mb4';
+ 
+// Membuat koneksi menggunakan mysqli
+$conn = new mysqli($host, $user, $pass, $db);
 
-// Membuat koneksi
-$koneksi = mysqli_connect($host, $username, $password, $database);
+// Cek jika ada error koneksi
+if ($conn->connect_error) {
+    die("Koneksi gagal: " . $conn->connect_error);
+}
 
-// Cek koneksi
-if (!$koneksi) {
-    die("Koneksi database gagal: " . mysqli_connect_error());
+$conn->set_charset($charset);
+ 
+// Helper: Start session jika belum
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 ?>
