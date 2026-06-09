@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Konfirmasi password tidak cocok.';
     } else {
         // Cek apakah email sudah terdaftar
-       $cek = $conn->prepare("SELECT id_user FROM users WHERE email = ? LIMIT 1");
+    $cek = $conn->prepare("SELECT id_user FROM users WHERE email = ? LIMIT 1");
         if (!$cek) {
             $error = 'Kesalahan database: ' . $conn->error;
         } else {
@@ -39,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $hash   = password_hash($password, PASSWORD_DEFAULT);
                 $status = 'aktif';
-                $stmt   = $koneksi->prepare("INSERT INTO users (nama, email, password, status_verifikasi) VALUES (?, ?, ?, ?)");
+                $stmt   = $conn->prepare("INSERT INTO users (nama, email, password) VALUES (?, ?, ?)");
                 if (!$stmt) {
-                    $error = 'Kesalahan database: ' . $koneksi->error;
+                    $error = 'Kesalahan database: ' .  $conn->error;
                 } else {
                     $stmt->bind_param("ssss", $nama, $email, $hash, $status);
                     if ($stmt->execute()) {
@@ -565,7 +565,7 @@ function togglePw(inputId, iconId) {
 // Password strength checker
 function checkStrength(val) {
     const bars  = [document.getElementById('sb1'), document.getElementById('sb2'),
-                   document.getElementById('sb3'), document.getElementById('sb4')];
+                [document.getElementById('sb3'), document.getElementById('sb4')]];
     const label = document.getElementById('slabel');
     bars.forEach(b => { b.className = 'sb'; });
 

@@ -12,7 +12,7 @@ if (!isset($_SESSION['id_user'])) {
 
 // Jika skip setup profil, update session agar tidak loop
 if (isset($_GET['skip'])) {
-    $_SESSION['profil_lengkap'] = true;
+    $_SESSION['is_complete'] = true;
 }
 
 $id_user = (int)$_SESSION['id_user'];
